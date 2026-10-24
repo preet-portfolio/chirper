@@ -24,13 +24,13 @@ User **hasMany** Chirp, and Chirp **belongsTo** User.
 
 ## Acceptance checklist (reference behaviour)
 
-### Install & layout
-- [ ] App boots, `/` renders the timeline for guests (reference: `GET /` → `ChirpController@index`)
-- [ ] Shared layout with nav: login/register for guests, logout for users
+### Install & layout · `tests/Feature/Layout/NavigationLinksTest.php`
+- [x] App boots, `/` renders the timeline for guests (reference: `GET /` → `ChirpController@index`; also `tests/Feature/Chirps/TimelineTest.php`)
+- [x] Shared layout with nav: Log in/Register for guests and no Log out; for users, their name linking to `profile.edit`, no guest links, and a Log out form (POST + CSRF) that actually logs out
 
 ### Auth (reference: Register / Login / Logout controllers)
-- [ ] Register, log in and log out work, and so does email verification (the starter kit adds this; reference has none)
-- [ ] Guest-only pages redirect users who are already logged in
+- [x] Register, log in and log out work (`tests/Feature/Auth/RegistrationTest.php`, `AuthenticationTest.php`, and the Log out form in `tests/Feature/Layout/NavigationLinksTest.php`), and so does email verification (`tests/Feature/Auth/EmailVerificationTest.php`; the starter kit adds this; reference has none). Verification is required to chirp: `tests/Feature/Chirps/CreateChirpTest.php` ("unverified user cannot post a chirp"), plus the edit/delete equivalents
+- [x] Guest-only pages (`/login`, `/register`) redirect users who are already logged in to `/` (`tests/Feature/Layout/NavigationLinksTest.php`)
 
 ### Create chirps (reference: `POST /chirps`) · `tests/Feature/Chirps/CreateChirpTest.php`, `ChirpModelTest.php`
 - [x] Logged-in, **verified** user posts a chirp → redirected to `/` with flash "Your chirp has been posted!" (ADR 0003)
@@ -56,9 +56,9 @@ User **hasMany** Chirp, and Chirp **belongsTo** User.
 - [x] Delete → flash "Chirp deleted!"; only that chirp is removed
 - [x] Non-author → 403 (I3); guest → login (no id probing); unverified → verify notice; missing → 404
 
-### Console & schedule (reference: `chirps:delete-all`, hourly)
-- [ ] `php artisan chirps:delete-all` deletes every chirp and prints the count
-- [ ] Scheduled hourly (demo reset). This is a reference behaviour; keep it behind config so production can turn it off
+### Console & schedule (reference: `chirps:delete-all`, hourly) · `tests/Feature/Console/DeleteAllChirpsTest.php`, `DemoResetScheduleTest.php`
+- [x] `php artisan chirps:delete-all` deletes every chirp and prints "Successfully deleted {n} chirps." (also with zero chirps; users untouched). In production it refuses without `--force` (ADR 0006)
+- [x] Scheduled hourly (demo reset) with `--force`, only when `config('chirper.demo_reset')` (`CHIRPER_DEMO_RESET`, default `false`) is true (ADR 0006)
 
 ### Depth extension (not in the 2025 reference; it was in the original bootcamp)
 - [ ] `ChirpCreated` event → queued `NewChirp` notification (mail) to all other users; retried with backoff; failed-job test; idempotent
