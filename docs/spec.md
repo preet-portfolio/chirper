@@ -32,10 +32,13 @@ User **hasMany** Chirp, and Chirp **belongsTo** User.
 - [ ] Register, log in and log out work, and so does email verification (the starter kit adds this; reference has none)
 - [ ] Guest-only pages redirect users who are already logged in
 
-### Create chirps (reference: `POST /chirps`)
-- [ ] Logged-in user posts a chirp → redirected to `/` with flash "Your chirp has been posted!"
-- [ ] Validation messages: "Please write something to chirp!" / "Chirps must be 255 characters or less."
-- [ ] Guest `POST /chirps` → redirect to login
+### Create chirps (reference: `POST /chirps`) · `tests/Feature/Chirps/CreateChirpTest.php`, `ChirpModelTest.php`
+- [x] Logged-in, **verified** user posts a chirp → redirected to `/` with flash "Your chirp has been posted!" (ADR 0003)
+- [x] Validation messages: "Please write something to chirp!" / "Chirps must be 255 characters or less." (I1, incl. whitespace-only, 255 vs 256, trimming)
+- [x] Guest `POST /chirps` → redirect to login; unverified → `/verify-email`
+- [x] `user_id` taken from session; not mass assignable (I2)
+- [x] Rate limit 10/min per user → 429, other users unaffected (I6)
+- [x] FK cascade on user delete (I5); `created_at` index for I4
 
 ### Show chirps (reference: `index`, `Chirp::with('user')->latest()->take(50)`)
 - [ ] Timeline lists newest 50 with author name and relative time (I4, I8)

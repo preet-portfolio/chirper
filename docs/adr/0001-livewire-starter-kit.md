@@ -1,6 +1,6 @@
 # 0001: Livewire starter kit on Laravel 13 instead of hand-rolled Blade auth
 
-**Status:** accepted · 2026-10-24
+**Status:** accepted · 2026-10-24 · CRUD part amended by 0003
 
 **Context:** The 2025 bootcamp reference writes its own Register/Login/Logout controllers so beginners can see them. We want production-grade auth (verification, rate-limited login, password reset, 2FA, passkeys) and want all logic to stay in PHP so framework tracing remains readable.
 
