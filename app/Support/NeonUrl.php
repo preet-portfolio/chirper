@@ -14,10 +14,14 @@ class NeonUrl
      */
     public static function withEndpointInPassword(mixed $url): mixed
     {
-        // Raw env() values: anything that isn't a non-empty string passes through untouched.
-        $parts = is_string($url) && $url !== '' ? parse_url($url) : false;
+        // Raw env() values: anything that isn't a string passes through untouched.
+        if (! is_string($url)) {
+            return $url;
+        }
 
-        if (! $parts || ! isset($parts['host'], $parts['pass']) || ! str_ends_with($parts['host'], '.neon.tech')) {
+        $parts = parse_url($url);
+
+        if (! isset($parts['host'], $parts['pass']) || ! str_ends_with($parts['host'], '.neon.tech')) {
             return $url;
         }
 
@@ -28,11 +32,6 @@ class NeonUrl
         $endpoint = preg_replace('/-pooler$/', '', explode('.', $parts['host'])[0]);
         $prefix = rawurlencode("endpoint={$endpoint}\$");
 
-        return preg_replace(
-            '#^([a-z]+://[^:/@]+:)#i',
-            '${1}'.$prefix,
-            $url,
-            1,
-        );
+        return preg_replace('#^([a-z]+://[^:/@]+:)#i', '${1}'.$prefix, $url);
     }
 }

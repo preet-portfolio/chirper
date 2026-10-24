@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Chirp;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 
 /**
@@ -14,9 +15,6 @@ use Illuminate\Support\Str;
 class AuthorToken
 {
     public const COOKIE = 'chirper_author';
-
-    /** Keep the token a little longer than a chirp lives. */
-    public const COOKIE_MINUTES = 60 * 24 * 7;
 
     public function __construct(private Request $request) {}
 
@@ -30,6 +28,14 @@ class AuthorToken
     public function currentOrNew(): string
     {
         return $this->current() ?? Str::random(40);
+    }
+
+    /**
+     * Keep the token longer than a chirp lives.
+     */
+    public static function cookieMinutes(): int
+    {
+        return Config::integer('chirper.author_cookie_days') * 24 * 60;
     }
 
     public static function hash(string $token): string

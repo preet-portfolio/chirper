@@ -35,7 +35,7 @@ class ChirpController extends Controller
             $chirp->author_token_hash = AuthorToken::hash($token);
             $chirp->save();
 
-            Cookie::queue(Cookie::make(AuthorToken::COOKIE, $token, AuthorToken::COOKIE_MINUTES, httpOnly: true));
+            Cookie::queue(Cookie::make(AuthorToken::COOKIE, $token, AuthorToken::cookieMinutes(), httpOnly: true));
         }
 
         return redirect()->route('home')->with('success', 'Your chirp has been posted!');

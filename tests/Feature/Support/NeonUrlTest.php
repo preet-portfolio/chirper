@@ -41,4 +41,5 @@ test('non-neon, already-prefixed and empty urls are left alone', function (mixed
     'empty' => [''],
     'null' => [null],
     'env boolean' => [true],
+    'neon without a password' => ['postgresql://app@ep-x-1.us-east-2.aws.neon.tech/db'],
 ]);

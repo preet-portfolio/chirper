@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
 
 /**
  * @property int $id
@@ -24,8 +25,13 @@ class Chirp extends Model
     /** @use HasFactory<ChirpFactory> */
     use HasFactory;
 
-    /** Chirps live this long on the public board. */
-    public const LIFETIME_HOURS = 24;
+    /**
+     * Chirps live this long on the public board.
+     */
+    public static function lifetimeHours(): int
+    {
+        return Config::integer('chirper.lifetime_hours');
+    }
 
     /**
      * @param  Builder<self>  $query
@@ -33,12 +39,12 @@ class Chirp extends Model
      */
     public function scopeLive(Builder $query): Builder
     {
-        return $query->where('created_at', '>', now()->subHours(self::LIFETIME_HOURS));
+        return $query->where('created_at', '>', now()->subHours(self::lifetimeHours()));
     }
 
     public static function pruneExpired(): void
     {
-        static::query()->where('created_at', '<=', now()->subHours(self::LIFETIME_HOURS))->delete();
+        static::query()->where('created_at', '<=', now()->subHours(self::lifetimeHours()))->delete();
     }
 
     /**
@@ -47,8 +53,8 @@ class Chirp extends Model
      * @param  mixed  $value
      * @param  string|null  $field
      */
-    public function resolveRouteBinding($value, $field = null): ?self
+    public function resolveRouteBinding($value, $field = null): ?Model
     {
-        return static::query()->live()->where($field ?? $this->getRouteKeyName(), $value)->first();
+        return $this->resolveRouteBindingQuery(static::query()->live(), $value, $field)->first();
     }
 }

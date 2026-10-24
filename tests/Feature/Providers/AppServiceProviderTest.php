@@ -97,6 +97,11 @@ test('in production destructive database commands are prohibited and strict mode
 });
 
 test('outside production strict mode is on', function () {
+    // Start from off, so a flag left set by another test can't make this pass.
+    Model::shouldBeStrict(false);
+
+    (new AppServiceProvider($this->app))->boot();
+
     expect(Model::preventsLazyLoading())->toBeTrue()
         ->and(Model::preventsSilentlyDiscardingAttributes())->toBeTrue()
         ->and(Model::preventsAccessingMissingAttributes())->toBeTrue();

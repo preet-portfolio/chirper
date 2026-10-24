@@ -94,7 +94,7 @@
       "Composer\\Config::disableProcessTimeout",
       "@php artisan config:clear --ansi",
       "@putenv XDEBUG_MODE=coverage",
-      "pest --mutate --no-cache --min=94 --class=App\\\\Http\\\\Controllers\\\\ChirpController,App\\\\Http\\\\Requests,App\\\\Policies,App\\\\Models\\\\Chirp,App\\\\Providers\\\\AppServiceProvider"
+      "pest --mutate --no-cache --min=96 --class=App\\\\Http\\\\Controllers\\\\ChirpController,App\\\\Http\\\\Requests,App\\\\Policies,App\\\\Models\\\\Chirp,App\\\\Providers\\\\AppServiceProvider,App\\\\Support,App\\\\Rules"
     ],
     "post-autoload-dump": [
       "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

@@ -141,3 +141,42 @@ test('the home page shows the chirp form with a personal-data disclaimer', funct
     expect(formSubmission($response, route('chirps.store')))
         ->toBe(['method' => 'POST', 'csrf' => true, 'fields' => ['message', 'website']]);
 });
+
+test('a malformed author cookie is replaced with a fresh token', function (string $bad) {
+    $token = $this->withCookie(AuthorToken::COOKIE, $bad)
+        ->post(route('chirps.store'), ['message' => 'Hi'])
+        ->getCookie(AuthorToken::COOKIE)->getValue();
+
+    expect($token)->toHaveLength(40)->not->toBe($bad)
+        ->and(Chirp::sole()->author_token_hash)->toBe(hash('sha256', $token));
+})->with([
+    'empty' => '',
+    'too short' => 'abc',
+    'too long' => str_repeat('a', 41),
+]);
+
+test('the author cookie lasts a week, longer than a chirp lives', function () {
+    $this->freezeTime();
+
+    $cookie = $this->post(route('chirps.store'), ['message' => 'Hi'])->getCookie(AuthorToken::COOKIE);
+
+    expect($cookie->getExpiresTime())->toBe(now()->addWeek()->getTimestamp())
+        ->and(AuthorToken::cookieMinutes() / 60)->toBeGreaterThan(Chirp::lifetimeHours());
+});
+
+test('the author hash is never serialized', function () {
+    $this->post(route('chirps.store'), ['message' => 'Hi']);
+
+    expect(Chirp::sole()->toArray())->not->toHaveKey('author_token_hash');
+});
+
+test('the chirp lifetime is configurable', function () {
+    config(['chirper.lifetime_hours' => 1]);
+    $older = Chirp::factory()->create(['created_at' => now()->subMinutes(61)]);
+    $newer = Chirp::factory()->create(['created_at' => now()->subMinutes(59)]);
+
+    $this->post(route('chirps.store'), ['message' => 'Hi']);
+
+    $this->assertModelMissing($older);
+    $this->assertModelExists($newer);
+});
