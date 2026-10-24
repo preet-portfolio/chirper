@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChirpCreated;
 use App\Http\Requests\StoreChirpRequest;
 use App\Http\Requests\UpdateChirpRequest;
 use App\Models\Chirp;
@@ -28,7 +29,9 @@ class ChirpController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $user->chirps()->create($request->validated());
+        $chirp = $user->chirps()->create($request->validated());
+
+        ChirpCreated::dispatch($chirp);
 
         return redirect()->route('home')->with('success', 'Your chirp has been posted!');
     }

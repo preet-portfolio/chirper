@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
  * @property string $message
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read User $user user_id is a non-null, cascading foreign key, so a chirp always has an author
  */
 #[Fillable(['message'])]
 class Chirp extends Model
