@@ -1,5 +1,7 @@
 # Trace: `DELETE /chirps/{chirp}` (`chirps.destroy`), delta only
 
+> **This trace describes the `v1-with-auth` request path.** On `main` (ADR 0008) there is no `auth`/verified middleware; route binding is scoped to `Chirp::live()`, so expired chirps 404, and `ChirpPolicy::delete` checks `AuthorToken::owns()` (the encrypted cookie's hash) instead of the user.
+
 Laravel 13.38.0, sqlite `:memory:` in tests. Paths are relative to `vendor/laravel/framework/src/Illuminate/`.
 Route: `routes/web.php:15` -> `ChirpController@destroy` (`Gate::authorize('delete', $chirp); $chirp->delete();
 redirect()->route('home')->with('success', 'Chirp deleted!')`).

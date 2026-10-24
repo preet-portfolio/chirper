@@ -1,5 +1,7 @@
 # 0007: New-chirp emails: controller event, per-recipient queued notifications, sent ledger
 
+> **Superseded for `main` by [0008](0008-anonymous-public-board.md); still describes tag `v1-with-auth`.** `main` has no accounts, so it sends no notifications.
+
 **Status:** accepted · 2026-10-24
 
 **Context:** The original bootcamp emails every other user when someone chirps. It does this from a model

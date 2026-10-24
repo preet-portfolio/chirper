@@ -1,5 +1,7 @@
 # 0001: Livewire starter kit on Laravel 13 instead of hand-rolled Blade auth
 
+> **Superseded for `main` by [0008](0008-anonymous-public-board.md); still describes tag `v1-with-auth`.** `main` has no Fortify auth and none of the starter kit's auth or settings pages; Flux UI stays.
+
 **Status:** accepted · 2026-10-24 · CRUD part amended by 0003
 
 **Context:** The 2025 bootcamp reference writes its own Register/Login/Logout controllers so beginners can see them. We want production-grade auth (verification, rate-limited login, password reset, 2FA, passkeys) and want all logic to stay in PHP so framework tracing remains readable.

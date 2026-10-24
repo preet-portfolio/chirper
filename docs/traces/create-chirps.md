@@ -1,5 +1,7 @@
 # Trace: `POST /chirps` (`chirps.store`)
 
+> **This trace describes the `v1-with-auth` request path.** On `main` (ADR 0008) there is no `auth`/verified middleware, only `throttle:chirps` (per IP, 5/min and 50/day); `store` drops honeypot posts, prunes expired chirps, sets `author_token_hash` from `AuthorToken` instead of `user_id`, queues the `chirper_author` cookie, and dispatches no event.
+
 Laravel 13.38.0, Livewire v4.4.8, Fortify v1.41.0 (from `composer.lock`). Paths are relative to
 `vendor/laravel/framework/src/Illuminate/` unless they start with `vendor/` or `app/`.
 

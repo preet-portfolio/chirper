@@ -1,5 +1,7 @@
 # 0003: Plain controllers + Blade for chirp CRUD; email verification required to chirp
 
+> **Partly superseded for `main` by [0008](0008-anonymous-public-board.md); still describes tag `v1-with-auth`.** Controllers + Blade still hold; the `auth`/`verified` requirement and the per-user limit are gone (per-IP 5/min and 50/day instead).
+
 **Status:** accepted · 2026-10-24 · amends 0001 ("Chirp CRUD uses Livewire components")
 
 **Context:** Every Livewire action goes through a single `POST /livewire/update` endpoint. That hides the routing, implicit binding and middleware we want to trace and test. The reference app's routes (`POST /chirps`, `PUT/DELETE /chirps/{chirp}`) also double as our acceptance spec.
