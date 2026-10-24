@@ -42,3 +42,8 @@ yarn-error.log
 /.env.local
 /.claude/worktrees
 /tests/Browser/Screenshots
+
+# Local-only tooling: AI assistant config and deploy plumbing stay off the public repo
+/.claude
+/CLAUDE.md
+/.vercelignore
