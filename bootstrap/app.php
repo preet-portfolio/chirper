@@ -14,7 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Vercel terminates TLS at its proxy. Trust only the headers it sets for scheme,
         // port and client IP -- never X-Forwarded-Host, which would let a forged header
-        // poison generated URLs (e.g. password reset links).
+        // poison generated URLs. The per-IP rate limits rely on Vercel overwriting X-Forwarded-For;
+        // behind any other proxy, restrict `at:` to that proxy's addresses.
         $middleware->trustProxies(
             at: '*',
             headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO,
