@@ -8,6 +8,7 @@
             @csrf
             <flux:textarea
                 name="message"
+                error:name="message"
                 :label="__('What\'s on your mind?')"
                 rows="3"
                 maxlength="255"

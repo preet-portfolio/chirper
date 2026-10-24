@@ -38,3 +38,4 @@ yarn-error.log
 /opencode.jsonc
 /.claude/settings.local.json
 /.remember
+/tests/Browser/Screenshots
