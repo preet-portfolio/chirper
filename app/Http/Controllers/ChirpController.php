@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\ChirpCreated;
 use App\Http\Requests\StoreChirpRequest;
 use App\Http\Requests\UpdateChirpRequest;
 use App\Models\Chirp;
-use App\Models\User;
+use App\Support\AuthorToken;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -15,7 +15,7 @@ class ChirpController extends Controller
 {
     public function index(): View
     {
-        $chirps = Chirp::with('user')
+        $chirps = Chirp::live()
             ->latest()
             ->latest('id')
             ->take(50)
@@ -24,14 +24,19 @@ class ChirpController extends Controller
         return view('home', ['chirps' => $chirps]);
     }
 
-    public function store(StoreChirpRequest $request): RedirectResponse
+    public function store(StoreChirpRequest $request, AuthorToken $author): RedirectResponse
     {
-        /** @var User $user */
-        $user = $request->user();
+        if (! $request->isFromBot()) {
+            Chirp::pruneExpired();
 
-        $chirp = $user->chirps()->create($request->validated());
+            $token = $author->currentOrNew();
 
-        ChirpCreated::dispatch($chirp);
+            $chirp = new Chirp($request->validated());
+            $chirp->author_token_hash = AuthorToken::hash($token);
+            $chirp->save();
+
+            Cookie::queue(Cookie::make(AuthorToken::COOKIE, $token, AuthorToken::COOKIE_MINUTES, httpOnly: true));
+        }
 
         return redirect()->route('home')->with('success', 'Your chirp has been posted!');
     }

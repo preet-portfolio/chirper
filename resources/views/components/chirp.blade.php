@@ -2,7 +2,7 @@
 
 <article class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700" data-test="chirp">
     <div class="flex items-baseline gap-2">
-        <flux:heading size="sm">{{ $chirp->user->name }}</flux:heading>
+        <flux:heading size="sm">{{ __('Anonymous') }}</flux:heading>
         <flux:text size="sm">
             <time datetime="{{ $chirp->created_at?->toIso8601String() }}">{{ $chirp->created_at?->diffForHumans() }}</time>
             @if ($chirp->updated_at?->gt($chirp->created_at))

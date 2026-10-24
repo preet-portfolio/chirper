@@ -3,7 +3,6 @@
         <flux:callout variant="success" icon="check-circle" class="mb-6" :heading="session('success')" />
     @endif
 
-    @auth
         <form method="POST" action="{{ route('chirps.store') }}" class="space-y-3">
             @csrf
             <flux:textarea
@@ -14,9 +13,12 @@
                 maxlength="255"
                 required
             >{{ old('message') }}</flux:textarea>
+            {{-- Honeypot: hidden from people, filled in by bots (StoreChirpRequest::isFromBot). --}}
+            <div class="hidden" aria-hidden="true">
+                <label>{{ __('Leave this empty') }} <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+            </div>
             <flux:button type="submit" variant="primary">{{ __('Chirp') }}</flux:button>
         </form>
-    @endauth
 
     <section class="mt-8 space-y-4">
         @forelse ($chirps as $chirp)

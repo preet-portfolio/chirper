@@ -31,16 +31,21 @@ test('dates are immutable', function () {
         ->and($chirp->created_at)->toBeInstanceOf(CarbonImmutable::class);
 });
 
-test('chirps rate limiter tolerates a guest request', function () {
+test('chirps rate limiter keys per client IP, per minute and per day', function () {
     $limiter = RateLimiter::limiter('chirps');
 
     expect($limiter)->not->toBeNull();
 
-    /** @var Limit $limit */
-    $limit = $limiter(Request::create('/chirps', 'POST'));
+    /** @var array<int, Limit> $limits */
+    $limits = $limiter(Request::create('/chirps', 'POST', server: ['REMOTE_ADDR' => '198.51.100.7']));
 
-    expect($limit->maxAttempts)->toBe(10)
-        ->and((string) $limit->key)->toBe('');
+    expect($limits)->toHaveCount(2)
+        ->and($limits[0]->maxAttempts)->toBe(5)
+        ->and($limits[0]->decaySeconds)->toBe(60)
+        ->and($limits[0]->key)->toBe('minute:198.51.100.7')
+        ->and($limits[1]->maxAttempts)->toBe(50)
+        ->and($limits[1]->decaySeconds)->toBe(86400)
+        ->and($limits[1]->key)->toBe('day:198.51.100.7');
 });
 
 test('outside production the password default is the framework minimum of 8', function () {

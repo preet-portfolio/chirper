@@ -3,8 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Chirp;
-use App\Models\User;
+use App\Support\AuthorToken;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Chirp>
@@ -12,15 +13,18 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class ChirpFactory extends Factory
 {
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),
             'message' => fake()->sentence(),
+            'author_token_hash' => AuthorToken::hash(Str::random(40)),
         ];
+    }
+
+    public function ownedBy(string $token): static
+    {
+        return $this->state(['author_token_hash' => AuthorToken::hash($token)]);
     }
 }

@@ -1,17 +1,15 @@
 <?php
 
 use App\Models\Chirp;
-use App\Models\User;
+use App\Support\AuthorToken;
 use Illuminate\Support\Facades\DB;
 
-test('guest sees chirps with their author', function () {
-    $chirp = Chirp::factory()
-        ->for(User::factory()->state(['name' => 'Ada Lovelace']))
-        ->create(['message' => 'First chirp ever']);
+test('chirps are shown as Anonymous', function () {
+    Chirp::factory()->create(['message' => 'First chirp ever']);
 
     $this->get(route('home'))
         ->assertOk()
-        ->assertSee('Ada Lovelace')
+        ->assertSee('Anonymous')
         ->assertSee('First chirp ever');
 });
 
@@ -32,7 +30,7 @@ test('chirps posted in the same second are ordered by most recent id', function 
 });
 
 test('only the 50 newest chirps are shown', function () {
-    Chirp::factory()->create(['message' => 'Too old to show', 'created_at' => now()->subDay()]);
+    Chirp::factory()->create(['message' => 'Too old to show', 'created_at' => now()->subHours(12)]);
     Chirp::factory()->count(50)->create();
 
     $response = $this->get(route('home'))->assertDontSee('Too old to show');
@@ -60,23 +58,30 @@ test('timeline uses a constant number of queries', function () {
     expect($queriesFor(20))->toBe($queriesFor(2));
 });
 
-test('timeline uses a constant number of queries for a signed-in user', function () {
-    $viewer = User::factory()->create();
+test('timeline uses a constant number of queries for a browser that owns chirps', function () {
+    $token = str_repeat('t', 40);
 
-    $queriesFor = function (int $chirps) use ($viewer) {
+    $queriesFor = function (int $chirps) use ($token) {
         Chirp::query()->delete();
         Chirp::factory()->count($chirps)->create();
-        Chirp::factory()->for($viewer)->count(2)->create();
+        Chirp::factory()->ownedBy($token)->count(2)->create();
 
         DB::flushQueryLog();
         DB::enableQueryLog();
-        $this->actingAs($viewer)->get(route('home'))->assertOk();
+        $this->withCookie(AuthorToken::COOKIE, $token)->get(route('home'))->assertOk();
         DB::disableQueryLog();
 
         return count(DB::getQueryLog());
     };
 
     expect($queriesFor(20))->toBe($queriesFor(2));
+});
+
+test('chirps older than 24 hours are not shown even before they are pruned', function () {
+    Chirp::factory()->create(['message' => 'Expired', 'created_at' => now()->subHours(25)]);
+    Chirp::factory()->create(['message' => 'Still fresh', 'created_at' => now()->subHours(23)]);
+
+    $this->get(route('home'))->assertSee('Still fresh')->assertDontSee('Expired');
 });
 
 test('chirp messages are escaped', function () {

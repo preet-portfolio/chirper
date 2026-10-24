@@ -7,23 +7,16 @@
         <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <x-app-logo href="{{ route('home') }}" />
 
-            <flux:spacer />
-
-            <flux:navbar class="space-x-0.5 py-0!">
-                @auth
-                    <flux:navbar.item :href="route('profile.edit')">{{ auth()->user()->name }}</flux:navbar.item>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <flux:navbar.item as="button" type="submit" data-test="logout-button">{{ __('Log out') }}</flux:navbar.item>
-                    </form>
-                @else
-                    <flux:navbar.item :href="route('login')">{{ __('Log in') }}</flux:navbar.item>
-                    <flux:navbar.item :href="route('register')">{{ __('Register') }}</flux:navbar.item>
-                @endauth
-            </flux:navbar>
         </flux:header>
 
         <flux:main container class="max-w-2xl">
+            <flux:callout variant="warning" icon="exclamation-triangle" class="mb-6" data-test="disclaimer">
+                <flux:callout.heading>{{ __('Public test board') }}</flux:callout.heading>
+                <flux:callout.text>
+                    {{ __("Anyone can read what you post here. Don't include personal data: no names, emails, phone numbers, addresses or anything that identifies you or someone else. Chirps are anonymous and are deleted after 24 hours.") }}
+                </flux:callout.text>
+            </flux:callout>
+
             {{ $slot }}
         </flux:main>
 
