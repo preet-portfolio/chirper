@@ -60,6 +60,25 @@ test('timeline uses a constant number of queries', function () {
     expect($queriesFor(20))->toBe($queriesFor(2));
 });
 
+test('timeline uses a constant number of queries for a signed-in user', function () {
+    $viewer = User::factory()->create();
+
+    $queriesFor = function (int $chirps) use ($viewer) {
+        Chirp::query()->delete();
+        Chirp::factory()->count($chirps)->create();
+        Chirp::factory()->for($viewer)->count(2)->create();
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $this->actingAs($viewer)->get(route('home'))->assertOk();
+        DB::disableQueryLog();
+
+        return count(DB::getQueryLog());
+    };
+
+    expect($queriesFor(20))->toBe($queriesFor(2));
+});
+
 test('chirp messages are escaped', function () {
     Chirp::factory()->create(['message' => '<script>alert("xss")</script>']);
 

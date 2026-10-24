@@ -46,10 +46,10 @@ User **hasMany** Chirp, and Chirp **belongsTo** User.
 - [x] Messages are escaped (I7)
 - [x] Empty state shown when there are no chirps
 
-### Edit chirps (reference: `GET /chirps/{chirp}/edit`, `PUT /chirps/{chirp}`)
-- [ ] Author sees an edit link on their chirps only
-- [ ] Update validates (I1) → flash "Chirp updated!"
-- [ ] Non-author → 403 (I3)
+### Edit chirps (reference: `GET /chirps/{chirp}/edit`, `PUT /chirps/{chirp}`) · `tests/Feature/Chirps/EditChirpTest.php`, `tests/Feature/Policies/ChirpPolicyTest.php`
+- [x] Author sees an edit link on their chirps only; guests see none
+- [x] Update validates (I1) → flash "Chirp updated!"; cannot reassign `user_id` (I2)
+- [x] Non-author → 403 on form and update, **before** validation (I3, ADR 0005); guest → login; unverified → verify notice; missing chirp → 404
 
 ### Delete chirps (reference: `DELETE /chirps/{chirp}`)
 - [ ] Author sees delete on their chirps only, and gets a confirm prompt

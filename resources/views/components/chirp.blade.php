@@ -9,6 +9,9 @@
                 · {{ __('edited') }}
             @endif
         </flux:text>
+        @can('update', $chirp)
+            <flux:link :href="route('chirps.edit', $chirp)" class="ms-auto text-sm">{{ __('Edit') }}</flux:link>
+        @endcan
     </div>
     <p class="mt-2 whitespace-pre-line break-words text-zinc-800 dark:text-zinc-100">{{ $chirp->message }}</p>
 </article>
