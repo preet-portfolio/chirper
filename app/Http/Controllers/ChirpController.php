@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreChirpRequest;
+use App\Models\Chirp;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -11,7 +12,13 @@ class ChirpController extends Controller
 {
     public function index(): View
     {
-        return view('home');
+        $chirps = Chirp::with('user')
+            ->latest()
+            ->latest('id')
+            ->take(50)
+            ->get();
+
+        return view('home', ['chirps' => $chirps]);
     }
 
     public function store(StoreChirpRequest $request): RedirectResponse

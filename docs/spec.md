@@ -40,9 +40,11 @@ User **hasMany** Chirp, and Chirp **belongsTo** User.
 - [x] Rate limit 10/min per user → 429, other users unaffected (I6)
 - [x] FK cascade on user delete (I5); `created_at` index for I4
 
-### Show chirps (reference: `index`, `Chirp::with('user')->latest()->take(50)`)
-- [ ] Timeline lists newest 50 with author name and relative time (I4, I8)
-- [ ] Empty state shown when there are no chirps
+### Show chirps (reference: `index`, `Chirp::with('user')->latest()->take(50)`) · `tests/Feature/Chirps/TimelineTest.php`
+- [x] Timeline lists newest 50 with author name and relative time (I4, I8), same-second ties by id desc (ADR 0004)
+- [x] Constant query count regardless of chirp/author count (I4)
+- [x] Messages are escaped (I7)
+- [x] Empty state shown when there are no chirps
 
 ### Edit chirps (reference: `GET /chirps/{chirp}/edit`, `PUT /chirps/{chirp}`)
 - [ ] Author sees an edit link on their chirps only

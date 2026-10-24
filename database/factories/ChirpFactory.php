@@ -20,7 +20,7 @@ class ChirpFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'message' => fake()->realText(140),
+            'message' => fake()->sentence(),
         ];
     }
 }

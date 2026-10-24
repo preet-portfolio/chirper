@@ -16,4 +16,12 @@
             <flux:button type="submit" variant="primary">{{ __('Chirp') }}</flux:button>
         </form>
     @endauth
+
+    <section class="mt-8 space-y-4">
+        @forelse ($chirps as $chirp)
+            <x-chirp :chirp="$chirp" />
+        @empty
+            <flux:text class="text-center">{{ __('No chirps yet. Be the first to chirp!') }}</flux:text>
+        @endforelse
+    </section>
 </x-layouts::public>
