@@ -43,15 +43,14 @@
     "VIEW_COMPILED_PATH": "/tmp/views",
     "LOG_CHANNEL": "stderr",
     "DB_CONNECTION": "pgsql",
-    "SESSION_DRIVER": "database",
+    "SESSION_DRIVER": "cookie",
     "SESSION_SECURE_COOKIE": "true",
     "CACHE_STORE": "database",
     "QUEUE_CONNECTION": "sync",
     "MAIL_MAILER": "log",
     "CHIRPER_DEMO_RESET": "false",
     "APP_URL": "https://chirper-kohl.vercel.app",
-    "LOG_STDERR_FORMATTER": "Monolog\\Formatter\\JsonFormatter",
-    "CHIRPER_REQUIRE_VERIFIED": "false"
+    "LOG_STDERR_FORMATTER": "Monolog\\Formatter\\JsonFormatter"
   },
   "installCommand": "echo \"assets are prebuilt locally (npm run build) before deploy\"",
   "buildCommand": "echo \"skipping: PHP runtime installs composer deps itself\"",

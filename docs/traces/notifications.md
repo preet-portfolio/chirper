@@ -1,5 +1,7 @@
 # Trace: new chirp → `ChirpCreated` → queued listener → `NewChirp` mail
 
+> **This trace describes the `v1-with-auth` request path.** None of it exists on `main` (ADR 0008): with no accounts, there is no `ChirpCreated` event, listener, `NewChirp` mail or sent ledger.
+
 Laravel 13.38.0, Telescope 5.26.0 (from `composer.lock`). Paths are relative to
 `vendor/laravel/framework/src/Illuminate/` unless they start with `app/`. Decisions: ADR 0007.
 

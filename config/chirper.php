@@ -17,15 +17,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Require Verified Email
+    | Public Board
     |--------------------------------------------------------------------------
     |
-    | When true, users must verify their email before they can chirp. The
-    | reference Bootcamp has no verification; deployments without an outbound
-    | mail provider turn this off so new users aren't stuck at the notice.
+    | Chirps are anonymous and short-lived. The author cookie (which lets the
+    | posting browser edit or delete its chirps) outlives them.
     |
     */
 
-    'require_verified' => (bool) env('CHIRPER_REQUIRE_VERIFIED', true),
+    'lifetime_hours' => (int) env('CHIRPER_LIFETIME_HOURS', 24),
+
+    'author_cookie_days' => 7,
 
 ];

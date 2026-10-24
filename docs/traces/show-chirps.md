@@ -1,5 +1,7 @@
 # Trace: `GET /` (`home`, `ChirpController@index`)
 
+> **This trace describes the `v1-with-auth` request path.** On `main` (ADR 0008) the query is `Chirp::live()` (last 24h) with no `user` eager load, authors show as "Anonymous", and `@can` runs `ChirpPolicy` with a null user, checking ownership through `AuthorToken` (the cookie) instead of the session guard.
+
 Laravel 13.38.0 (`php artisan --version`). Paths are relative to `vendor/laravel/framework/src/Illuminate/` unless
 they start with `vendor/`, `app/`, `resources/` or `database/`.
 

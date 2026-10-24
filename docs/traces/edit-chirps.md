@@ -1,5 +1,7 @@
 # Trace: `PUT /chirps/{chirp}` (`chirps.update`)
 
+> **This trace describes the `v1-with-auth` request path.** On `main` (ADR 0008) there is no `auth`/verified middleware; route binding is scoped to `Chirp::live()`, so expired chirps 404, and `ChirpPolicy::update` checks `AuthorToken::owns()` (the encrypted cookie's hash) instead of the user.
+
 Laravel 13.38.0, PHP 8.5.12, sqlite `:memory:` in tests. Paths are relative to
 `vendor/laravel/framework/src/Illuminate/` unless they start with `vendor/` or `app/`.
 

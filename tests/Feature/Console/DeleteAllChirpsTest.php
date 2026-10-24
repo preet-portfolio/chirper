@@ -20,7 +20,8 @@ test('chirps:delete-all succeeds when there are no chirps', function () {
 });
 
 test('chirps:delete-all leaves users untouched', function () {
-    $users = User::factory()->count(2)->has(Chirp::factory()->count(2))->create();
+    $users = User::factory()->count(2)->create();
+    Chirp::factory()->count(2)->create();
 
     $this->artisan('chirps:delete-all')->assertSuccessful();
 

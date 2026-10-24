@@ -6,12 +6,10 @@ use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Mail\Markdown;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -49,7 +47,11 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting(): void
     {
-        RateLimiter::for('chirps', fn (Request $request): Limit => Limit::perMinute(10)->by((string) $request->user()?->id));
+        // No accounts, so the anonymous board is limited per client IP (Vercel's X-Forwarded-For, see bootstrap/app.php).
+        RateLimiter::for('chirps', fn (Request $request): array => [
+            Limit::perMinute(5)->by('minute:'.$request->ip()),
+            Limit::perDay(50)->by('day:'.$request->ip()),
+        ]);
     }
 
     /**
@@ -64,18 +66,5 @@ class AppServiceProvider extends ServiceProvider
         );
 
         Model::shouldBeStrict(! app()->isProduction());
-
-        // Escape Markdown link syntax in echoed values too, so a chirp can't inject links into mail.
-        Markdown::withSecuredEncoding();
-
-        Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(12)
-                ->mixedCase()
-                ->letters()
-                ->numbers()
-                ->symbols()
-                ->uncompromised()
-            : null,
-        );
     }
 }
