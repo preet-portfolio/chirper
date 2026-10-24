@@ -12,8 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Vercel (and most PaaS) terminate TLS at a proxy in front of the app.
-        $middleware->trustProxies(at: '*');
+        // Vercel terminates TLS at its proxy. Trust only the headers it sets for scheme,
+        // port and client IP -- never X-Forwarded-Host, which would let a forged header
+        // poison generated URLs (e.g. password reset links).
+        $middleware->trustProxies(
+            at: '*',
+            headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO,
+        );
+        $middleware->trustHosts();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

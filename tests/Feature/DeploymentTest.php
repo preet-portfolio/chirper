@@ -5,10 +5,19 @@ use App\Models\User;
 test('urls use https behind a TLS-terminating proxy', function () {
     $this->actingAs(User::factory()->create())
         ->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
-        ->withHeaders(['X-Forwarded-Proto' => 'https', 'X-Forwarded-Host' => 'chirper.example.com', 'X-Forwarded-Port' => '443'])
+        ->withHeaders(['X-Forwarded-Proto' => 'https', 'X-Forwarded-Port' => '443'])
         ->get('/')
         ->assertOk()
-        ->assertSee('action="https://chirper.example.com/chirps"', escape: false);
+        ->assertSee('action="https://localhost/chirps"', escape: false);
+});
+
+test('a forged X-Forwarded-Host cannot poison generated urls', function () {
+    $this->actingAs(User::factory()->create())
+        ->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+        ->withHeaders(['X-Forwarded-Proto' => 'https', 'X-Forwarded-Host' => 'evil.example.com'])
+        ->get('/')
+        ->assertOk()
+        ->assertDontSee('evil.example.com');
 });
 
 test('pgsql connection falls back to the DATABASE_URL a hosting integration provides', function () {
