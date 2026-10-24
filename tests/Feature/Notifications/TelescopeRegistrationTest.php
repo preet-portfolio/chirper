@@ -1,5 +1,6 @@
 <?php
 
+use App\Providers\AppServiceProvider;
 use App\Providers\TelescopeServiceProvider;
 use Illuminate\Foundation\Providers\FoundationServiceProvider;
 use Illuminate\Support\Facades\Process;
@@ -47,3 +48,23 @@ test('telescope is not registered, enabled or routed when the app boots in produ
         ->and($production['enabled'])->toBeFalse()
         ->and($production['routes'])->toBe([]);
 });
+
+// In-process twins of the subprocess tests above: coverage (and so mutation
+// testing) can't see code that only runs in a child process.
+test('AppServiceProvider registers Telescope in the local environment', function () {
+    $this->app['env'] = 'local';
+
+    (new AppServiceProvider($this->app))->register();
+
+    expect($this->app->getProviders(Laravel\Telescope\TelescopeServiceProvider::class))->not->toBeEmpty()
+        ->and($this->app->getProviders(TelescopeServiceProvider::class))->not->toBeEmpty();
+});
+
+test('AppServiceProvider does not register Telescope outside local', function (string $environment) {
+    $this->app['env'] = $environment;
+
+    (new AppServiceProvider($this->app))->register();
+
+    expect($this->app->getProviders(Laravel\Telescope\TelescopeServiceProvider::class))->toBeEmpty()
+        ->and($this->app->getProviders(TelescopeServiceProvider::class))->toBeEmpty();
+})->with(['testing', 'production']);

@@ -1,5 +1,6 @@
 <?php
 
+use App\Providers\TelescopeServiceProvider;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
@@ -66,8 +67,11 @@ arch('security preset: no weak hashing, insecure randomness or eval')
 // Console\Commands extend Command and have handle(), Listeners have handle(),
 // controllers expose only resource methods, ...). It overlaps some rules
 // above; those stay so each convention has its own named, readable failure.
+// The one sanctioned provider-to-provider reference: AppServiceProvider registers
+// Telescope's provider in local only (Laravel's documented local-only pattern).
 arch('Laravel preset: framework namespace conventions')
-    ->preset()->laravel();
+    ->preset()->laravel()
+    ->ignoring(TelescopeServiceProvider::class);
 
 // Not enabled: preset()->strict(). It demands declare(strict_types=1) and
 // final on every class, which the Livewire starter kit (Fortify actions,
