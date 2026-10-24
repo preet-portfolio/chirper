@@ -4,6 +4,7 @@
         @method('PUT')
         <flux:textarea
             name="message"
+            error:name="message"
             :label="__('Edit your chirp')"
             rows="3"
             maxlength="255"

@@ -40,6 +40,5 @@ yarn-error.log
 /.remember
 /.vercel
 /.env.local
-.vercel
-.env*
 /.claude/worktrees
+/tests/Browser/Screenshots

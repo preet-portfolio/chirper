@@ -77,6 +77,11 @@
             "@types:check",
             "@php artisan test"
         ],
+        "test:browser": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan config:clear --ansi",
+            "@php artisan test --testsuite=Browser"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
