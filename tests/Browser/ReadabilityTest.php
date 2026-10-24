@@ -61,13 +61,5 @@ test('board text is readable', function (string $scheme, bool $expectDarkClass, 
 
     $verdict = sprintf('%s (%s): rgb(%s) on rgb(%s) is %.2f:1, below WCAG AA 4.5:1', $selector, $scheme, implode(',', $fg), implode(',', $bg), $ratio);
 
-    // KNOWN BUG, reported not fixed (tests may not change views): Flux's warning
-    // callout paints its heading yellow-600 on yellow-50 in light mode, about
-    // 2.84:1. Reported as incomplete rather than hidden; once the heading passes,
-    // this branch stops applying and the assertion below guards it like the rest.
-    if ($scheme === 'light' && $selector === DISCLAIMER.' [data-slot="heading"]' && $ratio < 4.5) {
-        $this->markTestIncomplete("Known bug: {$verdict}");
-    }
-
     expect($ratio)->toBeGreaterThanOrEqual(4.5, $verdict);
 })->with('colour schemes')->with('text to read');

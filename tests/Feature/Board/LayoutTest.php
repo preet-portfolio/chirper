@@ -30,3 +30,12 @@ test('every page carries the public-board disclaimer', function () {
             ->assertSee('deleted after 24 hours');
     }
 });
+
+test('the disclaimer states the configured lifetime', function (int $hours, string $phrase) {
+    config(['chirper.lifetime_hours' => $hours]);
+
+    $this->get(route('home'))->assertSee($phrase);
+})->with([
+    [1, 'deleted after 1 hour.'],
+    [48, 'deleted after 48 hours.'],
+]);

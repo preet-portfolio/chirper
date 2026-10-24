@@ -136,3 +136,21 @@ test('expired chirps cannot be edited', function () {
 
     $this->withCookie(AuthorToken::COOKIE, $token)->get(route('chirps.edit', $chirp))->assertNotFound();
 });
+
+test('editing and deleting share the per-IP rate limit', function () {
+    $token = postAs(null, 'Mine');
+    $chirp = Chirp::sole();
+
+    foreach (range(1, 4) as $i) {
+        $this->withCookie(AuthorToken::COOKIE, $token)
+            ->put(route('chirps.update', $chirp), ['message' => "Edit {$i}"])
+            ->assertRedirect(route('home'));
+    }
+
+    $this->withCookie(AuthorToken::COOKIE, $token)
+        ->put(route('chirps.update', $chirp), ['message' => 'Too many'])
+        ->assertTooManyRequests();
+    $this->withCookie(AuthorToken::COOKIE, $token)
+        ->delete(route('chirps.destroy', $chirp))
+        ->assertTooManyRequests();
+});
