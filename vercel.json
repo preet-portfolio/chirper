@@ -50,7 +50,8 @@
     "MAIL_MAILER": "log",
     "CHIRPER_DEMO_RESET": "false",
     "APP_URL": "https://chirper-kohl.vercel.app",
-    "LOG_STDERR_FORMATTER": "Monolog\\Formatter\\JsonFormatter"
+    "LOG_STDERR_FORMATTER": "Monolog\\Formatter\\JsonFormatter",
+    "CHIRPER_REQUIRE_VERIFIED": "false"
   },
   "installCommand": "echo \"assets are prebuilt locally (npm run build) before deploy\"",
   "buildCommand": "echo \"skipping: PHP runtime installs composer deps itself\"",

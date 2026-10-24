@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\ChirpController;
+use App\Http\Middleware\EnsureEmailIsVerifiedWhenRequired;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ChirpController::class, 'index'])->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', EnsureEmailIsVerifiedWhenRequired::class])->group(function () {
     Route::post('chirps', [ChirpController::class, 'store'])
         ->middleware('throttle:chirps')
         ->name('chirps.store');
