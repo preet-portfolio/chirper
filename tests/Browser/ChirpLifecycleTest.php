@@ -1,93 +1,91 @@
 <?php
 
 use App\Models\Chirp;
-use App\Models\User;
-use Illuminate\Support\Facades\URL;
 
-test('a new user registers, verifies, then posts, edits and deletes a chirp', function () {
-    $older = Chirp::factory()->create(['message' => 'An older chirp from someone else']);
+require_once __DIR__.'/Support/helpers.php';
 
-    // Register through the real form.
-    $page = visit('/register')
-        ->fill('name', 'Browser Bob')
-        ->fill('email', 'bob@example.com')
-        ->fill('password', 'correct-horse-battery-staple')
-        ->fill('password_confirmation', 'correct-horse-battery-staple')
-        ->click('Create account')
-        ->assertPathIs('/')
-        ->assertSee('Browser Bob');
+beforeEach(fn () => useBuiltAssets());
 
-    $bob = User::where('email', 'bob@example.com')->sole();
-    expect($bob->hasVerifiedEmail())->toBeFalse();
+test('a visitor posts, edits and deletes an anonymous chirp in one browser', function () {
+    $older = Chirp::factory()->create([
+        'message' => 'An older chirp from another browser',
+        'created_at' => now()->subHour(),
+        'updated_at' => now()->subHour(),
+    ]);
 
-    // Unverified: the form is shown, but posting lands on the verification notice.
-    $page->fill('message', 'Hello before verifying')
-        ->click('Chirp')
-        ->assertRoute('verification.notice')
-        ->assertSee('Please verify your email address');
+    $page = visit('/')
+        ->assertVisible(DISCLAIMER)
+        ->assertSeeIn(DISCLAIMER, 'Public test board')
+        ->assertSeeIn(DISCLAIMER, "Don't include personal data")
+        ->assertSeeIn(DISCLAIMER, 'deleted after 24 hours')
+        // Someone else's chirp: no controls before we have posted anything.
+        ->assertCount('[data-test="chirp"] a[href$="/edit"]', 0);
 
-    expect(Chirp::where('user_id', $bob->id)->count())->toBe(0);
-
-    // Follow the same signed link the verification email would contain.
-    $page->navigate(URL::temporarySignedRoute('verification.verify', now()->addHour(), [
-        'id' => $bob->id,
-        'hash' => sha1($bob->email),
-    ]))->assertPathIs('/');
-
-    expect($bob->fresh()->hasVerifiedEmail())->toBeTrue();
-
-    // Post: newest first, with the flash.
-    $page->fill('message', 'My first real chirp')
-        ->click('Chirp')
-        ->assertPathIs('/')
-        ->assertSee('Your chirp has been posted!')
-        ->assertSeeIn('[data-test="chirp"]:first-child', 'My first real chirp')
-        ->assertSeeIn('[data-test="chirp"]:first-child', 'Browser Bob')
+    // Post: newest first, anonymous, with the flash.
+    postChirp($page, 'My first anonymous chirp')
+        ->assertSeeIn(FIRST_CHIRP, 'My first anonymous chirp')
+        ->assertSeeIn(FIRST_CHIRP.' [data-flux-heading]', 'Anonymous')
         ->assertSeeIn('[data-test="chirp"]:nth-child(2)', $older->message)
-        ->assertDontSeeIn('[data-test="chirp"]:first-child', 'edited');
+        ->assertDontSeeIn(FIRST_CHIRP, 'edited')
+        // The cookie makes this browser the author of the new chirp only.
+        ->assertCount('[data-test="chirp"] a[href$="/edit"]', 1)
+        ->assertCount('[data-test="chirp"] form', 1)
+        ->assertCount(FIRST_CHIRP.' a[href$="/edit"]', 1);
+
+    $chirp = Chirp::where('message', 'My first anonymous chirp')->sole();
+
+    // Only the hash of the browser's token is stored; nothing identifies the poster.
+    expect($chirp->author_token_hash)->toMatch('/^[0-9a-f]{64}$/')
+        ->and($chirp->getAttributes())->not->toHaveKeys(['user_id', 'ip', 'name', 'email']);
 
     // "edited" compares updated_at with created_at at one-second resolution,
     // so move the clock instead of hoping the edit lands in a later second.
     $this->travel(1)->minute();
 
-    // Edit.
     $page->click('Edit')
-        ->assertPathEndsWith('/edit')
-        ->assertValue('message', 'My first real chirp')
-        ->fill('message', 'My first real chirp, revised')
+        ->assertPathIs("/chirps/{$chirp->id}/edit")
+        ->assertVisible(DISCLAIMER)
+        ->assertValue('message', 'My first anonymous chirp')
+        ->fill('message', 'My first anonymous chirp, revised')
         ->click('Save')
         ->assertPathIs('/')
         ->assertSee('Chirp updated!')
-        ->assertSeeIn('[data-test="chirp"]:first-child', 'My first real chirp, revised')
-        ->assertSeeIn('[data-test="chirp"]:first-child', 'edited');
+        ->assertSeeIn(FIRST_CHIRP, 'My first anonymous chirp, revised')
+        ->assertSeeIn(FIRST_CHIRP.' [data-flux-heading]', 'Anonymous')
+        ->assertSeeIn(FIRST_CHIRP, 'edited');
 
-    // Delete, dismissing the confirm() first: Playwright dismisses dialogs by
-    // default, so nothing is deleted. This proves the prompt really guards the form.
+    // Dismissing confirm() (Playwright's default) must keep the chirp:
+    // this proves the prompt really guards the form.
     $page->click('Delete')
         ->assertPathIs('/')
-        ->assertSee('My first real chirp, revised')
+        ->assertSee('My first anonymous chirp, revised')
         ->assertDontSee('Chirp deleted!');
 
-    expect(Chirp::where('user_id', $bob->id)->count())->toBe(1);
+    expect(Chirp::whereKey($chirp->id)->exists())->toBeTrue();
 
-    // The plugin has no dialog API, so accept the prompt by answering confirm()
-    // with true, recording its text in sessionStorage to survive the navigation.
-    $page->script(<<<'JS'
-        () => {
-            window.confirm = (message) => {
-                sessionStorage.setItem('confirmed', message);
-                return true;
-            };
-        }
-        JS);
+    acceptNextConfirm($page);
 
     $page->click('Delete')
         ->assertPathIs('/')
         ->assertSee('Chirp deleted!')
-        ->assertDontSee('My first real chirp, revised')
-        ->assertSee($older->message);
+        ->assertDontSee('My first anonymous chirp, revised')
+        ->assertSee($older->message)
+        ->assertCount('[data-test="chirp"]', 1);
 
     expect($page->script("() => sessionStorage.getItem('confirmed')"))->toBe('Delete this chirp?')
-        ->and(Chirp::where('user_id', $bob->id)->count())->toBe(0)
+        ->and(Chirp::whereKey($chirp->id)->exists())->toBeFalse()
         ->and(Chirp::count())->toBe(1);
+});
+
+test('a chirp leaves the board once it is older than the configured lifetime', function () {
+    $page = visit('/');
+    postChirp($page, 'Here today');
+
+    $this->travel(config('chirper.lifetime_hours'))->hours();
+    $this->travel(1)->minute();
+
+    $page->refresh()
+        ->assertDontSee('Here today')
+        ->assertSee('No chirps yet. Be the first to chirp!')
+        ->assertVisible(DISCLAIMER);
 });

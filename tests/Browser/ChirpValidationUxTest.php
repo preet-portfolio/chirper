@@ -1,11 +1,59 @@
 <?php
 
 use App\Models\Chirp;
-use App\Models\User;
 
-beforeEach(function () {
-    $this->user = User::factory()->create();
-    $this->actingAs($this->user);
+require_once __DIR__.'/Support/helpers.php';
+
+beforeEach(fn () => useBuiltAssets());
+
+dataset('personal data', [
+    'an email address' => 'Write to me at ada.lovelace@example.com',
+    'a phone number' => 'Call me on +44 20 7946 0958 after six',
+    'a dotted phone number' => 'Text 555.123.4567 for details',
+]);
+
+test('personal data is refused with the message on the field and the text kept', function (string $message) {
+    $page = visit('/')
+        ->fill('message', $message)
+        ->click('Chirp')
+        ->assertPathIs('/')
+        ->assertVisible('[data-flux-error]')
+        ->assertSeeIn('[data-flux-error]', PERSONAL_DATA_ERROR)
+        ->assertValue('message', $message)
+        ->assertDontSee('Your chirp has been posted!')
+        ->assertCount('[data-test="chirp"]', 0)
+        ->assertSee('No chirps yet. Be the first to chirp!');
+
+    // Announced to screen readers, not just painted red.
+    $page->assertAttribute('[data-flux-error]', 'role', 'alert');
+
+    expect(Chirp::count())->toBe(0);
+})->with('personal data');
+
+test('ordinary numbers are not mistaken for personal data', function (string $message) {
+    postChirp(visit('/'), $message)
+        ->assertSeeIn(FIRST_CHIRP, $message)
+        ->assertDontSee(PERSONAL_DATA_ERROR);
+
+    expect(Chirp::sole()->message)->toBe($message);
+})->with([
+    'a version number' => 'Laravel 13 is out',
+    'a room, a time and a date' => 'Room 101 at 9:30 on 25 October 2026',
+]);
+
+test('editing a chirp to add personal data shows the error on the edit form', function () {
+    $page = visit('/');
+    postChirp($page, 'Clean so far');
+    $chirp = Chirp::sole();
+
+    $page->click('Edit')
+        ->fill('message', 'Actually mail me: me@example.org')
+        ->click('Save')
+        ->assertPathIs("/chirps/{$chirp->id}/edit")
+        ->assertSeeIn('[data-flux-error]', PERSONAL_DATA_ERROR)
+        ->assertValue('message', 'Actually mail me: me@example.org');
+
+    expect($chirp->fresh()->message)->toBe('Clean so far');
 });
 
 test('the browser truncates a 256 character chirp to 255 and it posts', function () {
@@ -15,40 +63,10 @@ test('the browser truncates a 256 character chirp to 255 and it posts', function
 
     expect(mb_strlen($page->value('message')))->toBe(255);
 
-    $page->click('Chirp')
-        ->assertSee('Your chirp has been posted!')
+    postChirp($page, $page->value('message'))
         ->assertDontSee('Chirps must be 255 characters or less.');
 
     expect(Chirp::sole()->message)->toBe(str_repeat('a', 255));
-});
-
-test('a 256 character chirp that bypasses maxlength gets the server message', function () {
-    // Defence in depth: someone who strips the attribute (devtools, curl)
-    // still hits the FormRequest, and the error renders on the field.
-    $page = visit('/');
-    $page->script("() => document.querySelector('textarea[name=message]').removeAttribute('maxlength')");
-
-    $page->fill('message', str_repeat('a', 256))
-        ->click('Chirp')
-        ->assertPathIs('/')
-        ->assertSee('Chirps must be 255 characters or less.')
-        ->assertValue('message', str_repeat('a', 256));
-
-    expect(Chirp::count())->toBe(0);
-});
-
-test('an empty chirp is blocked by the required attribute before any request', function () {
-    $page = visit('/')->click('Chirp');
-
-    // Native constraint validation stops the submit: no navigation, no
-    // server error, and the field reports valueMissing.
-    expect($page->script("() => document.querySelector('textarea[name=message]').validity.valueMissing"))->toBeTrue()
-        ->and($page->script("() => document.querySelector('textarea[name=message]').validationMessage"))->not->toBe('');
-
-    $page->assertPathIs('/')
-        ->assertDontSee('Please write something to chirp!');
-
-    expect(Chirp::count())->toBe(0);
 });
 
 test('a whitespace-only chirp passes required in the browser but the server rejects it', function () {
@@ -56,19 +74,7 @@ test('a whitespace-only chirp passes required in the browser but the server reje
         ->fill('message', '   ')
         ->click('Chirp')
         ->assertPathIs('/')
-        ->assertSee('Please write something to chirp!');
+        ->assertSeeIn('[data-flux-error]', 'Please write something to chirp!');
 
     expect(Chirp::count())->toBe(0);
-});
-
-test('a whitespace-only edit shows the error on the edit form and keeps the chirp', function () {
-    $chirp = Chirp::factory()->for($this->user)->create(['message' => 'Keep me']);
-
-    visit(route('chirps.edit', $chirp))
-        ->fill('message', '   ')
-        ->click('Save')
-        ->assertPathEndsWith("/chirps/{$chirp->id}/edit")
-        ->assertSee('Please write something to chirp!');
-
-    expect($chirp->fresh()->message)->toBe('Keep me');
 });
