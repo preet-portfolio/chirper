@@ -73,7 +73,22 @@
             "@php artisan config:clear --ansi",
             "@lint:check",
             "@types:check",
+            "@test:arch",
             "@php artisan test"
+        ],
+        "test:arch": [
+            "pest tests/Arch.php"
+        ],
+        "test:coverage": [
+            "@php artisan config:clear --ansi",
+            "@putenv XDEBUG_MODE=coverage",
+            "@php artisan test --coverage --min=90"
+        ],
+        "test:mutate": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan config:clear --ansi",
+            "@putenv XDEBUG_MODE=coverage",
+            "pest --mutate --no-cache --min=94 --class=App\\\\Http\\\\Controllers\\\\ChirpController,App\\\\Http\\\\Requests,App\\\\Policies,App\\\\Models\\\\Chirp,App\\\\Providers\\\\AppServiceProvider"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
