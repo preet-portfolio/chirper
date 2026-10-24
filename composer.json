@@ -114,6 +114,11 @@
     ],
     "pre-package-uninstall": [
       "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+    ],
+    "deploy": [
+      "Composer\\Config::disableProcessTimeout",
+      "npm run build",
+      "vercel deploy --prod --yes"
     ]
   },
   "extra": {

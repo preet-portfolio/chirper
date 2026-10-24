@@ -54,5 +54,8 @@
   },
   "installCommand": "echo \"assets are prebuilt locally (npm run build) before deploy\"",
   "buildCommand": "echo \"skipping: PHP runtime installs composer deps itself\"",
-  "outputDirectory": "public"
+  "outputDirectory": "public",
+  "git": {
+    "deploymentEnabled": false
+  }
 }
