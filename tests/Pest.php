@@ -1,6 +1,8 @@
 <?php
 
+use Dom\HTMLDocument;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 /*
@@ -44,7 +46,39 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Describe how a browser would submit the form whose action is $action:
+ * the effective HTTP method (honouring _method spoofing), whether it carries
+ * a CSRF token, and the names of its other fields.
+ *
+ * @return array{method: string, csrf: bool, fields: list<string>}
+ */
+function formSubmission(TestResponse $response, string $action): array
 {
-    // ..
+    $document = HTMLDocument::createFromString((string) $response->getContent(), LIBXML_NOERROR);
+
+    $form = null;
+    foreach ($document->querySelectorAll('form') as $candidate) {
+        if ($candidate->getAttribute('action') === $action) {
+            $form = $candidate;
+        }
+    }
+
+    expect($form)->not->toBeNull("No form with action [{$action}] in the response.");
+
+    $method = strtoupper($form->getAttribute('method') ?: 'GET');
+    $fields = [];
+    $csrf = false;
+
+    foreach ($form->querySelectorAll('[name]') as $field) {
+        $name = (string) $field->getAttribute('name');
+
+        match ($name) {
+            '_token' => $csrf = true,
+            '_method' => $method === 'POST' ? $method = strtoupper((string) $field->getAttribute('value')) : null,
+            default => $fields[] = $name,
+        };
+    }
+
+    return ['method' => $method, 'csrf' => $csrf, 'fields' => $fields];
 }

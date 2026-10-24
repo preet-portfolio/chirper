@@ -12,6 +12,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('chirps/{chirp}/edit', [ChirpController::class, 'edit'])->name('chirps.edit');
     Route::put('chirps/{chirp}', [ChirpController::class, 'update'])->name('chirps.update');
+    Route::delete('chirps/{chirp}', [ChirpController::class, 'destroy'])->name('chirps.destroy');
 });
 
 require __DIR__.'/settings.php';

@@ -6,11 +6,13 @@ use App\Models\User;
 test('author can view the edit form for their chirp', function () {
     $chirp = Chirp::factory()->create(['message' => 'Original words']);
 
-    $this->actingAs($chirp->user)
+    $response = $this->actingAs($chirp->user)
         ->get(route('chirps.edit', $chirp))
         ->assertOk()
-        ->assertSee('Original words')
-        ->assertSee('name="message"', escape: false);
+        ->assertSee('Original words');
+
+    expect(formSubmission($response, route('chirps.update', $chirp)))
+        ->toBe(['method' => 'PUT', 'csrf' => true, 'fields' => ['message']]);
 });
 
 test('non-author cannot view the edit form', function () {

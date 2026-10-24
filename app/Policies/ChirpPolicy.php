@@ -14,4 +14,12 @@ class ChirpPolicy
     {
         return $chirp->user()->is($user);
     }
+
+    /**
+     * Only the author may delete their chirp.
+     */
+    public function delete(User $user, Chirp $chirp): bool
+    {
+        return $chirp->user()->is($user);
+    }
 }

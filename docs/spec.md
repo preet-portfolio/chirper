@@ -51,10 +51,10 @@ User **hasMany** Chirp, and Chirp **belongsTo** User.
 - [x] Update validates (I1) → flash "Chirp updated!"; cannot reassign `user_id` (I2)
 - [x] Non-author → 403 on form and update, **before** validation (I3, ADR 0005); guest → login; unverified → verify notice; missing chirp → 404
 
-### Delete chirps (reference: `DELETE /chirps/{chirp}`)
-- [ ] Author sees delete on their chirps only, and gets a confirm prompt
-- [ ] Delete → flash "Chirp deleted!"
-- [ ] Non-author → 403 (I3)
+### Delete chirps (reference: `DELETE /chirps/{chirp}`) · `tests/Feature/Chirps/DeleteChirpTest.php`, `tests/Feature/Policies/ChirpPolicyTest.php`
+- [x] Author sees delete on their chirps only, and gets a confirm prompt; guests see none
+- [x] Delete → flash "Chirp deleted!"; only that chirp is removed
+- [x] Non-author → 403 (I3); guest → login (no id probing); unverified → verify notice; missing → 404
 
 ### Console & schedule (reference: `chirps:delete-all`, hourly)
 - [ ] `php artisan chirps:delete-all` deletes every chirp and prints the count

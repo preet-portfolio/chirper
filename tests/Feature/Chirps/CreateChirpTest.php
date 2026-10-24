@@ -105,10 +105,12 @@ test('posting is rate limited to 10 chirps per minute per user', function () {
 });
 
 test('verified user sees the chirp form on the home page', function () {
-    $this->actingAs(User::factory()->create())
+    $response = $this->actingAs(User::factory()->create())
         ->get(route('home'))
-        ->assertOk()
-        ->assertSee('name="message"', escape: false);
+        ->assertOk();
+
+    expect(formSubmission($response, route('chirps.store')))
+        ->toBe(['method' => 'POST', 'csrf' => true, 'fields' => ['message']]);
 });
 
 test('guest does not see the chirp form', function () {

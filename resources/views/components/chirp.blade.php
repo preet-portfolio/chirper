@@ -9,9 +9,18 @@
                 · {{ __('edited') }}
             @endif
         </flux:text>
-        @can('update', $chirp)
-            <flux:link :href="route('chirps.edit', $chirp)" class="ms-auto text-sm">{{ __('Edit') }}</flux:link>
-        @endcan
+        <div class="ms-auto flex items-center gap-3 text-sm">
+            @can('update', $chirp)
+                <flux:link :href="route('chirps.edit', $chirp)">{{ __('Edit') }}</flux:link>
+            @endcan
+            @can('delete', $chirp)
+                <form method="POST" action="{{ route('chirps.destroy', $chirp) }}" onsubmit="return confirm(@js(__('Delete this chirp?')))">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-red-600 hover:underline dark:text-red-400">{{ __('Delete') }}</button>
+                </form>
+            @endcan
+        </div>
     </div>
     <p class="mt-2 whitespace-pre-line break-words text-zinc-800 dark:text-zinc-100">{{ $chirp->message }}</p>
 </article>
