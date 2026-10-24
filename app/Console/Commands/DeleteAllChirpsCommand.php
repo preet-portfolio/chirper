@@ -10,7 +10,7 @@ use Illuminate\Console\ConfirmableTrait;
 
 #[Signature('chirps:delete-all {--force : Run without confirmation in production}')]
 #[Description('Delete every chirp (the demo reset)')]
-class DeleteAllChirps extends Command
+class DeleteAllChirpsCommand extends Command
 {
     use ConfirmableTrait;
 
