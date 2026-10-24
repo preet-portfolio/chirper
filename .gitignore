@@ -38,3 +38,8 @@ yarn-error.log
 /opencode.jsonc
 /.claude/settings.local.json
 /.remember
+/.vercel
+/.env.local
+.vercel
+.env*
+/.claude/worktrees
