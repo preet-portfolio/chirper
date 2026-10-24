@@ -11,7 +11,7 @@
 
             <flux:navbar class="space-x-0.5 py-0!">
                 @auth
-                    <flux:navbar.item :href="route('dashboard')">{{ auth()->user()->name }}</flux:navbar.item>
+                    <flux:navbar.item :href="route('profile.edit')">{{ auth()->user()->name }}</flux:navbar.item>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <flux:navbar.item as="button" type="submit" data-test="logout-button">{{ __('Log out') }}</flux:navbar.item>

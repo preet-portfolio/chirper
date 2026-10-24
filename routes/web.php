@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [ChirpController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
-
     Route::post('chirps', [ChirpController::class, 'store'])
         ->middleware('throttle:chirps')
         ->name('chirps.store');
