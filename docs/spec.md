@@ -60,9 +60,9 @@ User **hasMany** Chirp, and Chirp **belongsTo** User.
 - [ ] `php artisan chirps:delete-all` deletes every chirp and prints the count
 - [ ] Scheduled hourly (demo reset). This is a reference behaviour; keep it behind config so production can turn it off
 
-### Depth extension (not in the 2025 reference; it was in the original bootcamp)
-- [ ] `ChirpCreated` event → queued `NewChirp` notification (mail) to all other users; retried with backoff; failed-job test; idempotent
-- [ ] Telescope locally to observe the request, queries, job and mail
+### Depth extension (not in the 2025 reference; it was in the original bootcamp) · `tests/Feature/Notifications/`, ADR 0007, `docs/traces/notifications.md`
+- [x] `ChirpCreated` dispatched by `store` (not by factories/seeders) → queued listener → queued `NewChirp` mail, one job per recipient, to every **other verified** user, in chunks; retried with backoff; failed path logged; idempotent per (chirp, recipient); deleted chirps send nothing; message escaped (HTML and Markdown)
+- [x] Telescope locally to observe the request, queries, job and mail (never registered in testing or production)
 
 ### Deploy
 - [ ] CI green (Pint, Larastan L8, Pest + coverage, `composer audit`, SQLite + Postgres)
